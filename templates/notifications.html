@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - SecureBank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --secondary-color: #00695c;
+        }
+        
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--primary-color);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .notification-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .notification-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .notification-unread {
+            background: #f8f9fa;
+            border-left-color: #ff6f00;
+        }
+        
+        .notification-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .notification-icon-success { background: #d4edda; color: #155724; }
+        .notification-icon-info { background: #d1ecf1; color: #0c5460; }
+        .notification-icon-warning { background: #fff3cd; color: #856404; }
+        .notification-icon-danger { background: #f8d7da; color: #721c24; }
+        
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .mark-read-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-4">
+                    <h4><i class="fas fa-university"></i> SecureBank</h4>
+                    <hr class="bg-white">
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a class="nav-link" href="/transfer"><i class="fas fa-exchange-alt"></i> Transfer Money</a>
+                    <a class="nav-link" href="/transactions"><i class="fas fa-history"></i> Transactions</a>
+                    <a class="nav-link" href="/loans"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+                    <a class="nav-link" href="/investments"><i class="fas fa-chart-line"></i> Investments</a>
+                    <a class="nav-link" href="/bills"><i class="fas fa-file-invoice-dollar"></i> Bills</a>
+                    <a class="nav-link" href="/rewards"><i class="fas fa-gift"></i> Rewards</a>
+                    <a class="nav-link" href="/analytics"><i class="fas fa-chart-pie"></i> Analytics</a>
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile</a>
+                    <a class="nav-link active" href="/notifications"><i class="fas fa-bell"></i> Notifications</a>
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-bell"></i> Notifications</h3>
+                    <button class="btn btn-outline-primary" onclick="markAllRead()">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                </div>
+                
+                {% if notifications %}
+                <div class="mb-3">
+                    <small class="text-muted">{{ notifications|length }} notifications</small>
+                </div>
+                
+                {% for notification in notifications %}
+                <div class="notification-card {% if not notification.is_read %}notification-unread{% endif %}" 
+                     onclick="markAsRead('{{ notification.notification_id }}')">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="notification-icon notification-icon-{{ notification.type }}">
+                                <i class="fas fa-{% if notification.type == 'success' %}check-circle{% elif notification.type == 'info' %}info-circle{% elif notification.type == 'warning' %}exclamation-triangle{% else %}times-circle{% endif %}"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ notification.title }}</h6>
+                                    <p class="mb-1 text-muted small">{{ notification.message }}</p>
+                                    <small class="text-muted">{{ notification.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                {% if not notification.is_read %}
+                                <span class="badge bg-primary ms-2">New</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Notification Preferences -->
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6><i class="fas fa-cog"></i> Notification Preferences</h6>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="emailNotif" checked>
+                                <label class="form-check-label" for="emailNotif">
+                                    Email Notifications
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="smsNotif">
+                                <label class="form-check-label" for="smsNotif">
+                                    SMS Notifications
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="pushNotif" checked>
+                                <label class="form-check-label" for="pushNotif">
+                                    Push Notifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary mt-3" onclick="savePreferences()">
+                        Save Preferences
+                    </button>
+                </div>
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                    <h5>No Notifications</h5>
+                    <p class="text-muted">You're all caught up! Check back later for updates.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function markAsRead(notificationId) {
+            // In a real app, this would call an API endpoint
+            console.log('Mark as read:', notificationId);
+            location.reload();
+        }
+        
+        function markAllRead() {
+            if (confirm('Mark all notifications as read?')) {
+                // In a real app, this would call an API endpoint
+                alert('All notifications marked as read');
+                location.reload();
+            }
+        }
+        
+        function savePreferences() {
+            const email = document.getElementById('emailNotif').checked;
+            const sms = document.getElementById('smsNotif').checked;
+            const push = document.getElementById('pushNotif').checked;
+            
+            // In a real app, this would save to database
+            alert('Notification preferences saved!');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

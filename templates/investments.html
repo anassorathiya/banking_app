@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investments - SecureBank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --secondary-color: #00695c;
+        }
+        
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--primary-color);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .investment-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .investment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .investment-type {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        .btn-invest {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-invest:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .maturity-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+        }
+        
+        .maturity-soon { background: #fff3e0; color: #f57c00; }
+        .maturity-active { background: #e8f5e9; color: #388e3c; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-4">
+                    <h4><i class="fas fa-university"></i> SecureBank</h4>
+                    <hr class="bg-white">
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a class="nav-link" href="/transfer"><i class="fas fa-exchange-alt"></i> Transfer Money</a>
+                    <a class="nav-link" href="/transactions"><i class="fas fa-history"></i> Transactions</a>
+                    <a class="nav-link" href="/loans"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+                    <a class="nav-link active" href="/investments"><i class="fas fa-chart-line"></i> Investments</a>
+                    <a class="nav-link" href="/pay-bills"><i class="fas fa-file-invoice-dollar"></i> Pay Bills</a>
+                    <a class="nav-link" href="/rewards"><i class="fas fa-gift"></i> Rewards</a>
+                    <a class="nav-link" href="/analytics"><i class="fas fa-chart-pie"></i> Analytics</a>
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile</a>
+                    <a class="nav-link" href="/notifications"><i class="fas fa-bell"></i> Notifications</a>
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-chart-line"></i> My Investments</h3>
+                    <a href="/invest" class="btn btn-invest">
+                        <i class="fas fa-plus"></i> New Investment
+                    </a>
+                </div>
+                
+                <!-- Investment Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="investment-card text-center">
+                            <i class="fas fa-chart-line fa-3x text-primary mb-2"></i>
+                            <h4>Total Invested</h4>
+                            <h3>{{ format_currency(investments|sum(attribute='amount')) }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="investment-card text-center">
+                            <i class="fas fa-chart-simple fa-3x text-success mb-2"></i>
+                            <h4>Current Value</h4>
+                            <h3>{{ format_currency(investments|sum(attribute='current_value')) }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="investment-card text-center">
+                            <i class="fas fa-calendar-check fa-3x text-info mb-2"></i>
+                            <h4>Active Investments</h4>
+                            <h3>{{ investments|length }}</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Investment List -->
+                {% if investments %}
+                {% for investment in investments %}
+                <div class="investment-card">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <span class="investment-type">
+                                <i class="fas fa-chart-line"></i> {{ investment.investment_type|title }}
+                            </span>
+                            <h5 class="mt-2">Investment Amount: {{ format_currency(investment.amount) }}</h5>
+                            <p class="text-muted mb-1">Investment ID: {{ investment.investment_id[:8] }}...</p>
+                            <p class="text-muted mb-1">Interest Rate: {{ investment.interest_rate }}% p.a.</p>
+                            <p class="text-muted">Tenure: {{ investment.tenure_months }} months</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <h4>{{ format_currency(investment.maturity_amount) }}</h4>
+                            <p class="text-muted">Maturity Amount</p>
+                            <span class="maturity-badge maturity-{% if (investment.maturity_date - now).days < 30 %}soon{% else %}active{% endif %}">
+                                Matures: {{ investment.maturity_date.strftime('%d %b %Y') }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>Investment Progress</small>
+                            <small>{{ ((investment.current_value / investment.maturity_amount) * 100)|round }}%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ (investment.current_value / investment.maturity_amount * 100)|round }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small>Current: {{ format_currency(investment.current_value) }}</small>
+                            <small>Target: {{ format_currency(investment.maturity_amount) }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewInvestmentDetails('{{ investment.investment_id }}')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        {% if investment.status == 'active' and investment.investment_type == 'fixed_deposit' %}
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="prematureWithdrawal('{{ investment.investment_id }}')">
+                            <i class="fas fa-hand-holding-usd"></i> Premature Withdrawal
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="investment-card text-center py-5">
+                    <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                    <h5>No Active Investments</h5>
+                    <p class="text-muted">Start investing to grow your wealth!</p>
+                    <a href="/invest" class="btn btn-invest mt-2">Start Investing</a>
+                </div>
+                {% endif %}
+                
+                <!-- Investment Tips -->
+                <div class="investment-card mt-4">
+                    <h5><i class="fas fa-lightbulb"></i> Investment Tips</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <i class="fas fa-chart-line text-success me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Diversify Your Portfolio</strong>
+                                    <p class="text-muted small">Don't put all your eggs in one basket. Spread investments across different types.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <i class="fas fa-clock text-info me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Start Early</strong>
+                                    <p class="text-muted small">The earlier you start investing, the more time your money has to grow.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <i class="fas fa-chart-simple text-warning me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Understand Risk</strong>
+                                    <p class="text-muted small">Different investments carry different risk levels. Choose based on your risk appetite.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <i class="fas fa-percent text-primary me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Compound Interest</strong>
+                                    <p class="text-muted small">Let your returns generate more returns. Reinvest your earnings.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function viewInvestmentDetails(investmentId) {
+            alert(`View details for investment: ${investmentId}\nThis will show complete investment performance and projections.`);
+        }
+        
+        function prematureWithdrawal(investmentId) {
+            if (confirm('Premature withdrawal may result in penalty and loss of interest. Are you sure?')) {
+                alert(`Process premature withdrawal for investment: ${investmentId}\nYou will receive OTP for verification.`);
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

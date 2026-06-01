@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - SecureBank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --secondary-color: #00695c;
+        }
+        
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--primary-color);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .transactions-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .filter-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .transaction-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .transaction-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .credit {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .debit {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .pagination {
+            margin-top: 20px;
+        }
+        
+        .page-link {
+            color: var(--primary-color);
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .filter-select {
+            border-radius: 10px;
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-4">
+                    <h4><i class="fas fa-university"></i> SecureBank</h4>
+                    <hr class="bg-white">
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a class="nav-link" href="/transfer"><i class="fas fa-exchange-alt"></i> Transfer Money</a>
+                    <a class="nav-link active" href="/transactions"><i class="fas fa-history"></i> Transactions</a>
+                    <a class="nav-link" href="/apply-loan"><i class="fas fa-hand-holding-usd"></i> Apply Loan</a>
+                    <a class="nav-link" href="/invest"><i class="fas fa-chart-line"></i> Invest</a>
+                    <a class="nav-link" href="/pay-bills"><i class="fas fa-file-invoice-dollar"></i> Pay Bills</a>
+                    <a class="nav-link" href="/rewards"><i class="fas fa-gift"></i> Rewards</a>
+                    <a class="nav-link" href="/analytics"><i class="fas fa-chart-pie"></i> Analytics</a>
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile</a>
+                    <a class="nav-link" href="/notifications"><i class="fas fa-bell"></i> Notifications</a>
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="transactions-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3><i class="fas fa-history"></i> Transaction History</h3>
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Export
+                        </button>
+                    </div>
+                    
+                    <!-- Filter Bar -->
+                    <div class="filter-bar">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>From Date</label>
+                                <input type="date" class="form-control" id="fromDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label>To Date</label>
+                                <input type="date" class="form-control" id="toDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Transaction Type</label>
+                                <select class="form-select" id="typeFilter">
+                                    <option value="all">All</option>
+                                    <option value="credit">Credits</option>
+                                    <option value="debit">Debits</option>
+                                    <option value="transfer">Transfers</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-primary w-100" onclick="filterTransactions()">
+                                    <i class="fas fa-filter"></i> Apply Filter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transactions List -->
+                    <div id="transactionsList">
+                        {% for transaction in transactions %}
+                        <div class="transaction-item" data-type="{{ transaction.transaction_type }}" data-date="{{ transaction.timestamp.strftime('%Y-%m-%d') }}">
+                            <div class="row align-items-center">
+                                <div class="col-md-5">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            {% if transaction.transaction_type == 'credit' %}
+                                            <i class="fas fa-arrow-down text-success fa-lg"></i>
+                                            {% else %}
+                                            <i class="fas fa-arrow-up text-danger fa-lg"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <strong>{{ transaction.description }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                            {% if transaction.category %}
+                                            <br>
+                                            <span class="category-badge">{{ transaction.category|title }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {% if transaction.recipient_account %}
+                                    <small class="text-muted">Account: {{ transaction.recipient_account }}</small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <span class="{% if transaction.transaction_type == 'credit' %}credit{% else %}debit{% endif %} fs-5">
+                                        {% if transaction.transaction_type == 'credit' %}+{% else %}-{% endif %}
+                                        {{ format_currency(transaction.amount) }}
+                                    </span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <small class="text-muted">Balance: {{ format_currency(transaction.balance_after) }}</small>
+                                    {% if transaction.points_earned > 0 %}
+                                    <br>
+                                    <small class="text-success"><i class="fas fa-star"></i> +{{ transaction.points_earned }} pts</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No transactions found</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Summary -->
+                    {% if transactions %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <h6>Total Credits</h6>
+                                <h5 class="text-success">
+                                    {{ format_currency(transactions|selectattr('transaction_type', 'equalto', 'credit')|sum(attribute='amount')) }}
+                                </h5>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Total Debits</h6>
+                                <h5 class="text-danger">
+                                    {{ format_currency(transactions|selectattr('transaction_type', 'in', ['debit', 'transfer'])|sum(attribute='amount')) }}
+                                </h5>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Net Balance</h6>
+                                <h5 class="text-primary">
+                                    {{ format_currency(transactions|selectattr('transaction_type', 'equalto', 'credit')|sum(attribute='amount') - 
+                                                      transactions|selectattr('transaction_type', 'in', ['debit', 'transfer'])|sum(attribute='amount')) }}
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function filterTransactions() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            
+            const transactions = document.querySelectorAll('.transaction-item');
+            
+            transactions.forEach(transaction => {
+                let show = true;
+                const date = transaction.dataset.date;
+                const type = transaction.dataset.type;
+                
+                if (fromDate && date < fromDate) show = false;
+                if (toDate && date > toDate) show = false;
+                if (typeFilter !== 'all' && type !== typeFilter) show = false;
+                
+                transaction.style.display = show ? 'block' : 'none';
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

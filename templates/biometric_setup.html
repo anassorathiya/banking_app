@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Setup - SecureBank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --secondary-color: #00695c;
+        }
+        
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--primary-color);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .biometric-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .fingerprint-icon {
+            font-size: 100px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .btn-setup {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-setup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .btn-disable {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .setup-steps {
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-4">
+                    <h4><i class="fas fa-university"></i> SecureBank</h4>
+                    <hr class="bg-white">
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a class="nav-link" href="/transfer"><i class="fas fa-exchange-alt"></i> Transfer Money</a>
+                    <a class="nav-link" href="/transactions"><i class="fas fa-history"></i> Transactions</a>
+                    <a class="nav-link" href="/loans"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+                    <a class="nav-link" href="/investments"><i class="fas fa-chart-line"></i> Investments</a>
+                    <a class="nav-link" href="/bills"><i class="fas fa-file-invoice-dollar"></i> Bills</a>
+                    <a class="nav-link" href="/rewards"><i class="fas fa-gift"></i> Rewards</a>
+                    <a class="nav-link" href="/analytics"><i class="fas fa-chart-pie"></i> Analytics</a>
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile</a>
+                    <a class="nav-link active" href="/notifications"><i class="fas fa-bell"></i> Notifications</a>
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="biometric-card">
+                    <div class="fingerprint-icon">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    
+                    <h3>Biometric Authentication</h3>
+                    <p class="text-muted">Secure your account with fingerprint or face recognition</p>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST">
+                        {% if user.biometric_enabled %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Biometric authentication is currently <strong>ENABLED</strong>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="biometric_enabled" id="biometric_enabled" checked>
+                            <label class="form-check-label" for="biometric_enabled">
+                                Enable Biometric Authentication
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-disable">
+                            <i class="fas fa-toggle-off"></i> Disable Biometric
+                        </button>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Biometric authentication is currently <strong>DISABLED</strong>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="biometric_enabled" id="biometric_enabled">
+                            <label class="form-check-label" for="biometric_enabled">
+                                Enable Biometric Authentication
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-setup">
+                            <i class="fas fa-fingerprint"></i> Setup Biometric
+                        </button>
+                        {% endif %}
+                    </form>
+                    
+                    <div class="setup-steps">
+                        <h6>How it works:</h6>
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Enable biometric authentication using the toggle above</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Verify your identity with OTP sent to your email</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Use fingerprint/face recognition for future logins</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Biometric data is encrypted and stored securely</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt"></i> Your biometric data is encrypted and never leaves your device
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewards - SecureBank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --secondary-color: #00695c;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --platinum: #e5e4e2;
+        }
+        
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: var(--primary-color);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .tier-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .points-circle {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            color: var(--primary-color);
+        }
+        
+        .benefit-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        
+        .tier-bronze { background: var(--bronze); color: white; }
+        .tier-silver { background: var(--silver); color: #333; }
+        .tier-gold { background: var(--gold); color: #333; }
+        .tier-platinum { background: var(--platinum); color: #333; }
+        
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        .reward-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .reward-item:hover {
+            background: #e8f5e9;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="p-4">
+                    <h4><i class="fas fa-university"></i> SecureBank</h4>
+                    <hr class="bg-white">
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a class="nav-link" href="/transfer"><i class="fas fa-exchange-alt"></i> Transfer Money</a>
+                    <a class="nav-link" href="/transactions"><i class="fas fa-history"></i> Transactions</a>
+                    <a class="nav-link" href="/loans"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+                    <a class="nav-link" href="/investments"><i class="fas fa-chart-line"></i> Investments</a>
+                    <a class="nav-link" href="/bills"><i class="fas fa-file-invoice-dollar"></i> Bills</a>
+                    <a class="nav-link active" href="/rewards"><i class="fas fa-gift"></i> Rewards</a>
+                    <a class="nav-link" href="/analytics"><i class="fas fa-chart-pie"></i> Analytics</a>
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profile</a>
+                    <a class="nav-link" href="/notifications"><i class="fas fa-bell"></i> Notifications</a>
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="tier-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center">
+                            <div class="points-circle">
+                                <div>
+                                    <h1 class="display-4">{{ reward.points }}</h1>
+                                    <p class="mb-0">Points</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h2>Your Rewards Status</h2>
+                            <span class="tier-badge tier-{{ reward.tier }}">
+                                <i class="fas fa-crown"></i> {{ reward.tier|title }} Member
+                            </span>
+                            <p class="mt-3">Points earned this month: <strong>{{ reward.points_earned_this_month }}</strong></p>
+                            {% if next_tier_points > 0 %}
+                            <div class="mt-3">
+                                <small>{{ next_tier_points }} points needed for next tier</small>
+                                <div class="progress">
+                                    {% set progress = ((reward.points / (reward.points + next_tier_points)) * 100) if (reward.points + next_tier_points) > 0 else 0 %}
+                                    <div class="progress-bar" style="width: {{ progress }}%"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Benefits -->
+                <h4 class="mb-3">Your Benefits</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="benefit-card">
+                            <i class="fas fa-percent fa-2x text-success mb-2"></i>
+                            <h5>Cashback Rate</h5>
+                            <p class="display-6">{{ benefits.cashback_rate }}%</p>
+                            <small class="text-muted">on every transaction</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="benefit-card">
+                            <i class="fas fa-credit-card fa-2x text-primary mb-2"></i>
+                            <h5>ATM Withdrawal Limit</h5>
+                            <p class="display-6">${{ benefits.atm_withdrawal_limit }}</p>
+                            <small class="text-muted">per day</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="benefit-card">
+                            <i class="fas fa-exchange-alt fa-2x text-info mb-2"></i>
+                            <h5>Free Transactions</h5>
+                            <p class="display-6">{{ benefits.free_transactions }}</p>
+                            <small class="text-muted">per month</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="benefit-card">
+                            <i class="fas fa-headset fa-2x text-warning mb-2"></i>
+                            <h5>Priority Support</h5>
+                            <p class="display-6">{% if benefits.priority_support %}✓ Available{% else %}Not Available{% endif %}</p>
+                            <small class="text-muted">24/7 dedicated support</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Redeem Points -->
+                <h4 class="mb-3 mt-4">Redeem Your Points</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="reward-item" onclick="redeemPoints('cashback', 1000)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                                    <h6 class="mt-2">Cashback</h6>
+                                    <small>Get $10 cashback</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">1000 points</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="reward-item" onclick="redeemPoints('giftcard', 5000)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-gift fa-2x text-warning"></i>
+                                    <h6 class="mt-2">Gift Card</h6>
+                                    <small>$50 Amazon gift card</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">5000 points</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="reward-item" onclick="redeemPoints('voucher', 10000)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-ticket-alt fa-2x text-info"></i>
+                                    <h6 class="mt-2">Travel Voucher</h6>
+                                    <small>$100 travel voucher</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">10000 points</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- How to Earn -->
+                <div class="benefit-card mt-4">
+                    <h5><i class="fas fa-chart-line"></i> How to Earn More Points</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-exchange-alt fa-2x text-primary"></i>
+                                <p class="mt-2"><strong>1 point per $100</strong><br>on all transactions</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-trophy fa-2x text-warning"></i>
+                                <p class="mt-2"><strong>Bonus Points</strong><br>for reaching higher tiers</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-calendar-alt fa-2x text-success"></i>
+                                <p class="mt-2"><strong>Monthly Bonus</strong><br>for consistent usage</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function redeemPoints(rewardType, points) {
+            if (confirm(`Redeem ${points} points for this reward?`)) {
+                alert(`Reward redeemed successfully! ${rewardType} will be credited to your account.`);
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
